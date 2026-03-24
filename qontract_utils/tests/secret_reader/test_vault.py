@@ -67,7 +67,9 @@ class TestVaultSecretBackendAuthentication:
 
             backend = VaultSecretBackend(approle_settings)
 
-            mock_client_class.assert_called_once_with(url="https://vault.test")
+            mock_client_class.assert_called_once_with(
+                url="https://vault.test", timeout=10
+            )
             mock_client.auth.approle.login.assert_called_once_with(
                 role_id="test-role-id",
                 secret_id="test-secret-id",
@@ -90,7 +92,9 @@ class TestVaultSecretBackendAuthentication:
 
             backend = VaultSecretBackend(kube_settings)
 
-            mock_client_class.assert_called_once_with(url="https://vault.test")
+            mock_client_class.assert_called_once_with(
+                url="https://vault.test", timeout=10
+            )
             mock_client.auth.kubernetes.login.assert_called_once_with(
                 role="test-kube-role",
                 jwt=mock_jwt_token,
@@ -945,9 +949,10 @@ class TestVaultRetryConfiguration:
         """Test that VAULT_READ_RETRY_CONFIG is configured to skip Forbidden errors."""
         from qontract_utils.secret_reader.providers.vault import VAULT_READ_RETRY_CONFIG
 
-        # Verify retry config parameters
-        assert VAULT_READ_RETRY_CONFIG.attempts == 10
-        assert VAULT_READ_RETRY_CONFIG.timeout == 45.0
+        # Verify retry config parameters (reduced from 10/45s to 3/15s for faster failures)
+        assert VAULT_READ_RETRY_CONFIG.attempts == 3
+        assert VAULT_READ_RETRY_CONFIG.timeout == 15.0
+        assert VAULT_READ_RETRY_CONFIG.wait_max == 2.0
 
         # Verify on is a callable (function, not exception type)
         assert callable(VAULT_READ_RETRY_CONFIG.on)
