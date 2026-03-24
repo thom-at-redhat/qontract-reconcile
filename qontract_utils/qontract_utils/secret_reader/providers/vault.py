@@ -59,6 +59,9 @@ def _should_retry_vault(exc: Exception) -> bool:
 
 VAULT_READ_RETRY_CONFIG = RetryConfig(
     on=_should_retry_vault,
+    attempts=3,
+    timeout=15.0,
+    wait_max=2.0,
 )
 
 # KV secrets engine versions
@@ -266,7 +269,7 @@ class VaultSecretBackend(SecretBackend):
             hooks: Optional custom hooks to merge with built-in hooks
         """
         self._settings = settings
-        self._client = hvac.Client(url=settings.server)
+        self._client = hvac.Client(url=settings.server, timeout=10)
         self._kv_version_cache: dict[str, int] = {}  # Cache KV version per mount point
         self._auth_lock = threading.Lock()  # Lock for authentication operations
         self._closed = False
