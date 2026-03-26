@@ -14,7 +14,7 @@ class SecretManager:
         self.secret_backends = {backend.url: backend for backend in secret_backends}
 
     def read(self, secret: Secret) -> str:
-        cache_key = f"secret:{secret.url}:{secret.path}:{secret.version or '1'}"
+        cache_key = f"secret:{secret.url}:{secret.path}:{secret.field or ''}:{secret.version or '1'}"
         cached_value = self.cache.get(cache_key)
         if cached_value is not None:
             return cached_value
