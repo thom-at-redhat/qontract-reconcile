@@ -17,6 +17,7 @@ from qontract_api.integrations.glitchtip_project_alerts.domain import (
     GlitchtipProjectAlert,
 )
 from qontract_api.integrations.glitchtip_project_alerts.schemas import (
+    GlitchtipAlertAction,
     GlitchtipAlertActionCreate,
     GlitchtipAlertActionDelete,
     GlitchtipAlertActionUpdate,
@@ -122,11 +123,7 @@ class GlitchtipProjectAlertsService:
         instance_name: str,
         glitchtip: GlitchtipWorkspaceClient,
         organizations: list[GlitchtipOrganization],
-    ) -> list[
-        GlitchtipAlertActionCreate
-        | GlitchtipAlertActionUpdate
-        | GlitchtipAlertActionDelete
-    ]:
+    ) -> list[GlitchtipAlertAction]:
         """Calculate reconciliation actions for an instance.
 
         Fetches current state from Glitchtip and diffs against desired state.
@@ -139,11 +136,7 @@ class GlitchtipProjectAlertsService:
         Returns:
             List of actions to reconcile current to desired state
         """
-        actions: list[
-            GlitchtipAlertActionCreate
-            | GlitchtipAlertActionUpdate
-            | GlitchtipAlertActionDelete
-        ] = []
+        actions: list[GlitchtipAlertAction] = []
 
         current_org_by_name = glitchtip.get_organizations()
 
@@ -312,13 +305,9 @@ class GlitchtipProjectAlertsService:
         Returns:
             GlitchtipProjectAlertsTaskResult with actions, applied_count, and errors
         """
-        all_actions: list[
-            GlitchtipAlertActionCreate
-            | GlitchtipAlertActionUpdate
-            | GlitchtipAlertActionDelete
-        ] = []
+        all_actions: list[GlitchtipAlertAction] = []
+        applied_actions: list[GlitchtipAlertAction] = []
         errors: list[str] = []
-        applied_count = 0
 
         for instance in instances:
             instance_desired = instance.organizations
@@ -348,7 +337,7 @@ class GlitchtipProjectAlertsService:
                             action=action,
                             desired_orgs=instance_desired,
                         )
-                        applied_count += 1
+                        applied_actions.append(action)
                     except Exception as e:
                         error_msg = (
                             f"{action.instance}/{action.organization}/{action.project}"
@@ -360,6 +349,7 @@ class GlitchtipProjectAlertsService:
         return GlitchtipProjectAlertsTaskResult(
             status=TaskStatus.FAILED if errors else TaskStatus.SUCCESS,
             actions=all_actions,
-            applied_count=applied_count,
+            applied_actions=applied_actions,
+            applied_count=len(applied_actions),
             errors=errors,
         )
