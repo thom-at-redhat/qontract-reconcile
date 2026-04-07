@@ -14,6 +14,7 @@ class TaskStatus(StrEnum):
     PENDING = "pending"  # Task queued or in progress
     SUCCESS = "success"  # Task completed successfully
     FAILED = "failed"  # Task failed with errors
+    SKIPPED = "skipped"  # Task skipped due to deduplication
 
 
 class TaskResult(BaseModel, frozen=True):
@@ -25,7 +26,7 @@ class TaskResult(BaseModel, frozen=True):
 
     status: TaskStatus = Field(
         ...,
-        description="Task execution status (pending/success/failed)",
+        description="Task execution status (pending/success/failed/skipped)",
     )
     applied_count: int = Field(
         default=0,

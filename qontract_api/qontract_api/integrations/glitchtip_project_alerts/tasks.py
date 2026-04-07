@@ -53,7 +53,7 @@ def reconcile_glitchtip_project_alerts_task(
     instances: list[GlitchtipInstance],
     *,
     dry_run: bool = True,
-) -> GlitchtipProjectAlertsTaskResult | dict[str, str]:
+) -> GlitchtipProjectAlertsTaskResult:
     """Reconcile Glitchtip project alerts (background task).
 
     This task runs in a Celery worker, not in the FastAPI application.
@@ -65,8 +65,7 @@ def reconcile_glitchtip_project_alerts_task(
         dry_run: If True, only calculate actions without executing
 
     Returns:
-        GlitchtipProjectAlertsTaskResult on success
-        {"status": "skipped", "reason": "duplicate_task"} if duplicate task
+        GlitchtipProjectAlertsTaskResult on success, or with SKIPPED status if a duplicate is already running
 
     Note:
         @deduplicated_task decorator may return early if duplicate task is detected.

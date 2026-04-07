@@ -51,7 +51,7 @@ def reconcile_github_owners_task(
     organizations: list[GithubOrgDesiredState],
     *,
     dry_run: bool = True,
-) -> GithubOwnersTaskResult | dict[str, str]:
+) -> GithubOwnersTaskResult:
     """Reconcile GitHub organization owner membership (background task).
 
     This task runs in a Celery worker, not in the FastAPI application.
@@ -63,8 +63,7 @@ def reconcile_github_owners_task(
         dry_run: If True, only calculate actions without executing
 
     Returns:
-        GithubOwnersTaskResult on success
-        {"status": "skipped", "reason": "duplicate_task"} if duplicate task
+        GithubOwnersTaskResult on success, or with SKIPPED status if a duplicate is already running
 
     Note:
         @deduplicated_task decorator may return early if duplicate task is detected.

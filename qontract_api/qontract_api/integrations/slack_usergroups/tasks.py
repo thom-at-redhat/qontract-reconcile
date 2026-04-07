@@ -50,7 +50,7 @@ def reconcile_slack_usergroups_task(
     workspaces: list[SlackWorkspace],
     *,
     dry_run: bool = True,
-) -> SlackUsergroupsTaskResult | dict[str, str]:
+) -> SlackUsergroupsTaskResult:
     """Reconcile Slack usergroups (background task).
 
     This task runs in a Celery worker, not in the FastAPI application.
@@ -62,8 +62,7 @@ def reconcile_slack_usergroups_task(
         dry_run: If True, only calculate actions without executing
 
     Returns:
-        SlackUsergroupsTaskResult on success
-        {"status": "skipped", "reason": "duplicate_task"} if duplicate task
+        SlackUsergroupsTaskResult on success, or with SKIPPED status if a duplicate is already running
 
     Note:
         @deduplicated_task decorator may return early if duplicate task is detected.

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from qontract_api.models import TaskResult, TaskStatus
 from qontract_api.tasks import deduplicated_task
 
 
@@ -49,10 +50,34 @@ def test_deduplicated_task_skips_duplicate(mock_cache: MagicMock) -> None:
     with patch("qontract_api.tasks._deduplication.get_cache", return_value=mock_cache):
         result = test_task("workspace-1")
 
-    # Should return skip result
-    assert isinstance(result, dict)
-    assert result["status"] == "skipped"
-    assert result["reason"] == "duplicate_task"
+    # Should return TaskResult with SKIPPED status, not a raw dict
+    assert isinstance(result, TaskResult)
+    assert result.status == TaskStatus.SKIPPED
+    assert result.errors == ["duplicate_task"]
+
+
+def test_deduplicated_task_preserves_concrete_subclass_on_skip(
+    mock_cache: MagicMock,
+) -> None:
+    """Test skip result is an instance of the concrete TaskResult subclass."""
+
+    class CustomTaskResult(TaskResult):
+        pass
+
+    @deduplicated_task(lock_key_fn=lambda x: x, timeout=60)
+    def test_task(x: str) -> CustomTaskResult:
+        return CustomTaskResult(status=TaskStatus.SUCCESS)
+
+    mock_cache.lock.return_value.__enter__.side_effect = RuntimeError(
+        "Lock not acquired"
+    )
+
+    with patch("qontract_api.tasks._deduplication.get_cache", return_value=mock_cache):
+        result = test_task("workspace-1")
+
+    assert isinstance(result, CustomTaskResult)
+    assert result.status == TaskStatus.SKIPPED
+    assert result.errors == ["duplicate_task"]
 
 
 def test_deduplicated_task_with_multiple_args(mock_cache: MagicMock) -> None:
