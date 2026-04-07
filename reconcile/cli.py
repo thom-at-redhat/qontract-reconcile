@@ -1419,6 +1419,12 @@ def openshift_resources(
 @binary_version("helm", ["version"], HELM_VERSION_REGEX, HELM_VERSIONS)
 @click.option("--saas-file-name", default=None, help="saas-file to act on.")
 @click.option("--env-name", default=None, help="environment to deploy to.")
+@click.option(
+    "--grafana-saas-deploy-url",
+    default=None,
+    metavar="URL",
+    help=("Grafana dashboard URL"),
+)
 @trigger_integration
 @trigger_reason
 @click.pass_context
@@ -1429,6 +1435,7 @@ def openshift_saas_deploy(
     use_jump_host: bool,
     saas_file_name: str | None,
     env_name: str | None,
+    grafana_saas_deploy_url: str | None,
     trigger_integration: str | None,
     trigger_reason: str | None,
 ) -> None:
@@ -1442,6 +1449,7 @@ def openshift_saas_deploy(
         use_jump_host=use_jump_host,
         saas_file_name=saas_file_name,
         env_name=env_name,
+        grafana_saas_deploy_url=grafana_saas_deploy_url,
         trigger_integration=trigger_integration,
         trigger_reason=trigger_reason,
     )
