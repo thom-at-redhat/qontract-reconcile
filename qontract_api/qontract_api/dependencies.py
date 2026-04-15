@@ -7,10 +7,13 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from qontract_api.auth import decode_token
 from qontract_api.cache.base import CacheBackend
+from qontract_api.config import settings
 from qontract_api.event_manager import EventManager
+from qontract_api.logger import get_logger
 from qontract_api.models import User
 from qontract_api.secret_manager import SecretManager
 
+logger = get_logger(__name__)
 security = HTTPBearer()
 
 
@@ -21,6 +24,13 @@ def get_current_user(
     try:
         token = credentials.credentials
         payload = decode_token(token)
+        if payload.sub in settings.jwt_revoked_subjects:
+            logger.warning(f"Token subject '{payload.sub}' has been revoked")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         return User(username=payload.sub)
     except ValueError as e:
         raise HTTPException(
