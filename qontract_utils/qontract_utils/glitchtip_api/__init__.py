@@ -30,6 +30,9 @@ from qontract_utils.glitchtip_api.models import (
     ProjectAlert,
     ProjectAlertRecipient,
     RecipientType,
+    Team,
+    User,
+    slugify,
 )
 
 __all__ = [
@@ -41,4 +44,7 @@ __all__ = [
     "ProjectAlert",
     "ProjectAlertRecipient",
     "RecipientType",
+    "Team",
+    "User",
+    "slugify",
 ]
