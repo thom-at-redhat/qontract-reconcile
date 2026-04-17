@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+---
+language: "en-US"
+early_access: false
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_pause_after_reviewed_commits: 0
+    ignore_usernames:
+      - red-hat-konflux
+  path_instructions:
+    - path: "qontract_api_client/qontract_api_client/**/*.py"
+      instructions: |
+        This directory contains automatically generated client code for
+        the Qontract API. The code is generated using OpenAPI specifications
+        and is not meant to be manually edited. Do not suggest changes to this
+        code, as it may be overwritten by the code generation process.
+    - path: "**/tests/**/*.py"
+      instructions: |
+        - Test files are generally expected to use
+          synthetic/non-production data.
+          Continue to flag any hardcoded credentials, tokens, keys,
+          or PII if found.
+  pre_merge_checks:
+    title:
+      mode: "off"
+chat:
+  auto_reply: true
