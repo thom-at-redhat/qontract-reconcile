@@ -10,7 +10,9 @@ from reconcile.cli import (
     gitlab_project_id,
     log_level,
 )
-from reconcile.glitchtip.integration import get_user_role
+from reconcile.gql_definitions.glitchtip.glitchtip_project import (
+    RoleV1,
+)
 from reconcile.gql_definitions.glitchtip.glitchtip_project import (
     query as glitchtip_project_query,
 )
@@ -22,6 +24,15 @@ from reconcile.utils.mr.glitchtip_access_reporter import (
     UpdateGlitchtipAccessReport,
 )
 from reconcile.utils.runtime.environment import init_env
+
+DEFAULT_MEMBER_ROLE = "member"
+
+
+def get_user_role(organization: Organization, roles: RoleV1) -> str:
+    for role in roles.glitchtip_roles or []:
+        if role.organization.name == organization.name:
+            return role.role
+    return DEFAULT_MEMBER_ROLE
 
 
 @click.command()
